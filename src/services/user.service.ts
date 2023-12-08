@@ -6,7 +6,7 @@ import { excludedFields } from '../controllers/auth.controller';
 import { signJwt } from '../utils/jwt';
 import redisClient from '../utils/connectRedis';
 import { DocumentType } from '@typegoose/typegoose';
-
+import bcrypt from 'bcrypt';
 // CreateUser service
 export const createUser = async (input: Partial<User>) => {
   const user = await userModel.create(input);
