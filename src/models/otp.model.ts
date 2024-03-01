@@ -13,7 +13,7 @@ export class Otp {
   @prop({ required: true })
   otp: string;
 
-  @prop({ required: true })
+  @prop({ required: false })
   messageId: string;
 
   @prop({ required: false })

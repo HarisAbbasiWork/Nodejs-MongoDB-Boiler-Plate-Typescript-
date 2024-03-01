@@ -12,11 +12,15 @@ import redisClient from "../utils/connectRedis";
 import { signJwt, verifyJwt } from "../utils/jwt";
 import otpGenerator from 'otp-generator';
 import Role from '../models/role.model';
-import otpModel, {Otp} from '../models/otp.model';
+import otpModel, { Otp } from '../models/otp.model';
 import userModel, { User } from '../models/user.model';
 import bcrypt from 'bcryptjs';
-import { sendEmail, sendMessage } from '../utils/communication';
+import {
+  sendEmail,
+  //sendMessage
+} from '../utils/communication';
 import { DocumentType } from '@typegoose/typegoose';
+import mongoose from 'mongoose';
 const saltRounds = 10;
 // Exclude this fields from the response
 // Exclude this fields from the response
@@ -52,9 +56,15 @@ export const registerHandler = async (
   next: NextFunction
 ) => {
   try {
+    const { firstname, lastname, name, email, address, role } = req.body;
     const user = await createUser({
-      email: req.body.email,
+      email: email,
       password: req.body.password,
+      firstname,
+      lastname,
+      name,
+      address,
+      role: new mongoose.Types.ObjectId(role) // Convert string to ObjectId
     });
 
     res.status(201).json({
@@ -108,6 +118,7 @@ export const loginHandler = async (
       access_token,
     });
   } catch (err: any) {
+    console.log("err ",err)
     next(err);
   }
 };
@@ -169,7 +180,7 @@ export const sendOtpHandler = async (req: Request, res: Response, next: NextFunc
       success: true,
       message: "OTP has been sent.",
     });
-  } catch (err:any) {
+  } catch (err: any) {
     console.log(err);
     if (err.isJoi) {
       return res.status(422).json({
@@ -216,7 +227,7 @@ export const confirmOtpHandler = async (req: Request, res: Response, next: NextF
         });
       }
     });
-  } catch (err:any) {
+  } catch (err: any) {
     console.log(err);
     if (err.isJoi) {
       res.status(422).json({
@@ -242,7 +253,7 @@ export const forgetPasswordHandler = async (req: Request, res: Response, next: N
         .findOne({
           email: req.body.email,
         })
-        .then(async (user:DocumentType<User>|null) => {
+        .then(async (user: DocumentType<User> | null) => {
           console.log("user", user);
           //Checking If User Exists
           if (!user) {
@@ -271,13 +282,13 @@ export const forgetPasswordHandler = async (req: Request, res: Response, next: N
           user.resetPasswordOtp = otp;
           return user.save();
         })
-        .then((result:any) => {
+        .then((result: any) => {
           return res.status(200).send({
             success: true,
             message: "Reset Password Email sent",
           });
         })
-        .catch((err:any) => {
+        .catch((err: any) => {
           console.log(err);
         });
     } else if (phoneno) {
@@ -324,7 +335,7 @@ export const forgetPasswordHandler = async (req: Request, res: Response, next: N
         });
     }
 
-  } catch (err:any) {
+  } catch (err: any) {
     console.log("err.isJoi: ", err);
     if (err.isJoi) {
       res.status(422).json({
@@ -364,7 +375,7 @@ export const verifyOTPHandler = async (req: Request, res: Response, next: NextFu
           });
         }
       });
-  } catch (err:any) {
+  } catch (err: any) {
     console.log(err);
     if (err.isJoi) {
       res.status(422).json({
@@ -415,7 +426,7 @@ export const resetPasswordHandler = async (req: Request, res: Response, next: Ne
         message: "internal server error",
       });
     }
-  } catch (err:any) {
+  } catch (err: any) {
     console.log("err.isJoi: ", err);
     if (err.isJoi) {
       res.status(422).json({
@@ -439,7 +450,7 @@ export const getRolesHandler = async (req: Request, res: Response, next: NextFun
       success: true,
       roles: roles,
     });
-  } catch (err:any) {
+  } catch (err: any) {
     console.log(err);
     return res.status(500).json({
       success: false,

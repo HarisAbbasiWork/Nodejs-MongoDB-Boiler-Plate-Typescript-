@@ -33,6 +33,9 @@ export class User {
   @prop({ required: true })
   lastname: string;
 
+  @prop({ required: true })
+  name: string;
+
   @prop()
   gender: string;
 
